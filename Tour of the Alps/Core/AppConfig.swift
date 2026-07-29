@@ -5,7 +5,7 @@ import Foundation
 /// a real host later is a build-setting change rather than a code change.
 enum AppConfig {
     static let apiBaseURL: URL = {
-        let fallback = URL(string: "http://localhost:8088/api/v1")!
+        let fallback = URL(string: "https://tota-api.carloni.uk/api/v1")!
         guard let raw = Bundle.main.object(forInfoDictionaryKey: "TOTAAPIBaseURL") as? String,
               !raw.isEmpty,
               let url = URL(string: raw)
