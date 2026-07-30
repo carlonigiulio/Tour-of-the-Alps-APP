@@ -284,7 +284,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TOTA_API_BASE_URL = "http://localhost:8088/api/v1";
+				TOTA_API_BASE_URL = "https://tota-api.carloni.uk/api/v1";
 			};
 			name = Debug;
 		};
@@ -329,7 +329,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TOTA_API_BASE_URL = "http://localhost:8088/api/v1";
+				TOTA_API_BASE_URL = "https://tota-api.carloni.uk/api/v1";
 			};
 			name = Release;
 		};
