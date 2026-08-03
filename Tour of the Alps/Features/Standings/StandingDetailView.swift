@@ -3,15 +3,33 @@ import SwiftUI
 @Observable
 final class StandingDetailViewModel {
     var state: Loadable<StandingDetail> = .idle
+    /// Team jerseys keyed by team code, loaded only for the team classification.
+    var jerseys: [String: ImageSet] = [:]
 
     func load(id: Int, force: Bool = false) async {
         if case .loaded = state, !force { return }
         state = .loading
         do {
-            state = .loaded(try await TotaAPI.standing(id: id))
+            let detail = try await TotaAPI.standing(id: id)
+            state = .loaded(detail)
+            if detail.kind == .team { await loadJerseys() }
         } catch {
             state = .failed(error.localizedDescription)
         }
+    }
+
+    /// The standings feed identifies squads by `team_code`, which matches `short_name` in
+    /// `/teams` for every team in the 2024 field — that is the only link between the two
+    /// endpoints, so a missing code simply means no jersey rather than a broken row.
+    private func loadJerseys() async {
+        guard let teams = try? await TotaAPI.teams() else { return }
+        jerseys = Dictionary(
+            teams.compactMap { team in
+                guard let code = team.shortName?.nonEmpty, let logo = team.logo else { return nil }
+                return (code, logo)
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
     }
 }
 
@@ -62,12 +80,18 @@ struct StandingDetailView: View {
                 VStack(spacing: 0) {
                     columnHeader(detail.kind)
                     ForEach(Array(results.enumerated()), id: \.offset) { index, row in
-                        ResultRowView(row: row, kind: detail.kind)
+                        ResultRowView(row: row, kind: detail.kind, jerseys: model.jerseys)
                             .background(index.isMultiple(of: 2) ? Brand.surface : Brand.surfaceSubtle)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
+
+            // Escapes the horizontal padding below so the strip aligns with the rest of
+            // the app rather than being inset twice.
+            SponsorSection(page: .standingDetail, ref: String(standing.id))
+                .padding(.horizontal, -Metrics.gutter)
+                .padding(.top, 8)
         }
         .padding(.horizontal, Metrics.gutter)
         .padding(.bottom, 32)
@@ -90,7 +114,8 @@ struct StandingDetailView: View {
     private func columnHeader(_ kind: StandingKind) -> some View {
         HStack(spacing: 10) {
             Text(verbatim: "#").frame(width: 26, alignment: .leading)
-            Text("Rider").frame(maxWidth: .infinity, alignment: .leading)
+            Text(kind == .team ? LocalizedStringKey("Team") : LocalizedStringKey("Rider"))
+                .frame(maxWidth: .infinity, alignment: .leading)
             Text(kind.isPointsBased ? LocalizedStringKey("Points") : LocalizedStringKey("Time"))
                 .frame(width: 74, alignment: .trailing)
         }
@@ -107,35 +132,65 @@ struct StandingDetailView: View {
 struct ResultRowView: View {
     let row: ResultRow
     let kind: StandingKind
+    /// Jersey artwork keyed by team code, supplied only for the team classification.
+    var jerseys: [String: ImageSet] = [:]
 
     private var isLeader: Bool { row.rank == 1 }
+
+    /// The team classification ranks squads, not riders: the API leaves `rider_name` null
+    /// and puts the squad in `team_name`, so the usual two-line rider layout would render
+    /// an empty primary line.
+    private var isTeamRow: Bool { kind == .team }
 
     var body: some View {
         HStack(spacing: 10) {
             rankView
                 .frame(width: 26, alignment: .leading)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(row.riderName ?? "—")
-                    .font(.subheadline.weight(isLeader ? .bold : .medium))
-                    .foregroundStyle(Brand.ink)
-                    .lineLimit(1)
-                HStack(spacing: 5) {
-                    CountryBadge(code: row.riderNat)
-                    Text(row.teamName ?? row.teamCode ?? "")
-                        .font(.caption)
-                        .foregroundStyle(Brand.inkMuted)
-                        .lineLimit(1)
-                }
+            if isTeamRow {
+                teamLabel
+            } else {
+                riderLabel
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
 
             trailingValue
                 .frame(width: 74, alignment: .trailing)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.vertical, isTeamRow ? 8 : 10)
         .accessibilityElement(children: .combine)
+    }
+
+    private var teamLabel: some View {
+        HStack(spacing: 10) {
+            RemoteImage(url: jerseys[row.teamCode ?? ""]?.bestFull, contentMode: .fit)
+                .frame(width: 30, height: 30)
+                .padding(3)
+                .background(.white, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+
+            Text(row.teamName ?? row.teamCode ?? "—")
+                .font(.subheadline.weight(isLeader ? .bold : .medium))
+                .foregroundStyle(Brand.ink)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var riderLabel: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(row.riderName ?? "—")
+                .font(.subheadline.weight(isLeader ? .bold : .medium))
+                .foregroundStyle(Brand.ink)
+                .lineLimit(1)
+            HStack(spacing: 5) {
+                CountryBadge(code: row.riderNat)
+                Text(row.teamName ?? row.teamCode ?? "")
+                    .font(.caption)
+                    .foregroundStyle(Brand.inkMuted)
+                    .lineLimit(1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder

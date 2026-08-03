@@ -125,6 +125,8 @@ struct StageDetailView: View {
                     }
                 }
             }
+
+            SponsorSection(page: .stageDetail, ref: String(stage.number))
         }
         .padding(.bottom, 36)
     }

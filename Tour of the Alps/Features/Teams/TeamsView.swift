@@ -69,6 +69,10 @@ struct TeamsView: View {
                     }
                 }
             }
+
+            SponsorSection(page: .teams)
+                .padding(.horizontal, -Metrics.gutter)
+                .padding(.top, 6)
         }
         .padding(.horizontal, Metrics.gutter)
         .padding(.vertical, 16)

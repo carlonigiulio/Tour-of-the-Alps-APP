@@ -46,12 +46,15 @@ struct PostDetailView: View {
                     }
                 }
                 .padding(.horizontal, Metrics.gutter)
+
+                SponsorSection(page: .postDetail, ref: String(post.id))
+                    .padding(.top, 28)
             }
             .padding(.bottom, 36)
         }
         .background(Brand.surfaceSubtle)
         .ignoresSafeArea(edges: .top)
-        .navigationTitle("")
+        .navigationTitle(Text(verbatim: ""))
         .navigationBarTitleDisplayMode(.inline)
         .task { await model.load(id: post.id) }
     }

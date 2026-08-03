@@ -83,6 +83,10 @@ struct StandingsView: View {
                         }
                     }
                 }
+
+                SponsorSection(page: .standings)
+                    .padding(.horizontal, -Metrics.gutter)
+                    .padding(.top, 6)
             }
             .padding(.horizontal, Metrics.gutter)
             .padding(.vertical, 16)

@@ -9,6 +9,9 @@ import SwiftUI
 
 @main
 struct Tour_of_the_AlpsApp: App {
+    /// Firebase needs the UIKit lifecycle for the APNs registration callbacks.
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     init() {
         BrandFont.registerIfNeeded()
         configureImageCache()
@@ -17,6 +20,10 @@ struct Tour_of_the_AlpsApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .task {
+                    await PushService.shared.requestAuthorization()
+                    await PushService.shared.subscribeToTopics()
+                }
         }
     }
 

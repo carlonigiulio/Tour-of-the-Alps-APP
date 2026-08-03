@@ -122,6 +122,10 @@ struct HomeView: View {
                 .padding(.horizontal, Metrics.gutter)
             }
 
+            // Between editorial blocks rather than appended at the end, so the banner
+            // reads as part of the page instead of an afterthought.
+            SponsorSection(page: .home, styles: [.banner, .strip])
+
             if !model.latest.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     SectionHeader(title: "Latest news")
@@ -149,6 +153,9 @@ struct HomeView: View {
                     }
                 }
             }
+
+            // The full category stack closes the home page, the way it closes the website.
+            SponsorSection(page: .home, styles: [.footer])
         }
         .padding(.bottom, 36)
     }

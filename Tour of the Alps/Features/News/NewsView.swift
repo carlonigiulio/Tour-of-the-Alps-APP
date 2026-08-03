@@ -81,9 +81,20 @@ struct NewsView: View {
                 }
             }
 
+            // Banners get their own anchor between the video rail and the article feed,
+            // where they read as a break between sections rather than an interruption.
+            SponsorSection(page: .news, styles: [.banner])
+                .padding(.horizontal, -Metrics.gutter)
+
             SectionHeader(title: "Latest")
 
-            ForEach(posts) { post in
+            // The other styles sit after the first few articles rather than at the end of
+            // the list. News is the only paginated screen: with 36 full-width cards that
+            // keep loading as you scroll, anything appended after the last post is
+            // effectively unreachable.
+            let sponsorIndex = min(4, posts.count - 1)
+
+            ForEach(Array(posts.enumerated()), id: \.element.id) { index, post in
                 NavigationLink {
                     PostDetailView(post: post)
                 } label: {
@@ -91,6 +102,11 @@ struct NewsView: View {
                 }
                 .buttonStyle(.plain)
                 .task { await model.loadMoreIfNeeded(current: post) }
+
+                if index == sponsorIndex {
+                    SponsorSection(page: .news, styles: [.strip, .footer])
+                        .padding(.horizontal, -Metrics.gutter)
+                }
             }
         }
         .padding(.horizontal, Metrics.gutter)

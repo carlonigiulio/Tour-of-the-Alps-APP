@@ -36,7 +36,8 @@ struct TeamDetailView: View {
         .background(Brand.surfaceSubtle)
         // The green header already states the team name — a bar title repeating the
         // three-letter code on top of it is just clutter.
-        .navigationTitle("")
+        // `verbatim` keeps Xcode from extracting an empty key into the String Catalog.
+        .navigationTitle(Text(verbatim: ""))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $selectedRider) { rider in
             RiderSheet(slot: rider, teamName: team.title)
@@ -88,6 +89,9 @@ struct TeamDetailView: View {
                 }
             }
             .padding(.horizontal, Metrics.gutter)
+
+            SponsorSection(page: .teamDetail, ref: String(team.id))
+                .padding(.top, 4)
         }
         .padding(.bottom, 32)
     }

@@ -120,6 +120,10 @@ enum TotaAPI {
         try await client.get("riders/\(id)", as: Envelope<Rider>.self).data
     }
 
+    static func sponsors() async throws -> [SponsorPlacement] {
+        try await client.get("sponsors", as: Envelope<[SponsorPlacement]>.self).data
+    }
+
     static func standings() async throws -> [Standing] {
         try await client.get("standings", as: Envelope<[Standing]>.self).data
     }

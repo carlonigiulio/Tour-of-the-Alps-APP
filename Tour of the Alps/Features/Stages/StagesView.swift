@@ -59,6 +59,12 @@ struct StagesView: View {
                 }
                 .buttonStyle(.plain)
             }
+
+            // Cancels the list's own inset so the block lines up with the rest of the app
+            // instead of being padded twice.
+            SponsorSection(page: .stages)
+                .padding(.horizontal, -Metrics.gutter)
+                .padding(.top, 6)
         }
         .padding(.horizontal, Metrics.gutter)
         .padding(.bottom, 28)

@@ -13,5 +13,11 @@
 	<array>
 		<string>Gilvar.ttf</string>
 	</array>
+	<!-- Lets silent/data pushes wake the app so content can be refreshed ahead of the
+	     user opening it. Alert-only pushes work without this. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

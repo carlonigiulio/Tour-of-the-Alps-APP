@@ -13,6 +13,7 @@ final class AppModel {
 
 struct RootView: View {
     @State private var app = AppModel()
+    @State private var sponsors = SponsorStore()
 
     var body: some View {
         TabView {
@@ -32,7 +33,9 @@ struct RootView: View {
                 .tabItem { Label("News", systemImage: "newspaper.fill") }
         }
         .tint(Brand.green)
+        .environment(sponsors)
         .task { await app.refresh() }
+        .task { await sponsors.load() }
     }
 }
 
