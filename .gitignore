@@ -1,6 +1,5 @@
 # Firebase — per-project config, keep out of the repo.
 # Each developer / CI environment supplies its own.
-GoogleService-Info.plist
 
 # Xcode user state
 xcuserdata/
