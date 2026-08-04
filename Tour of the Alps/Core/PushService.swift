@@ -22,6 +22,10 @@ final class PushService: NSObject {
 
     private(set) var fcmToken: String?
 
+    /// Set by `RootView` once the interface exists. A tap that arrives before then is
+    /// queued by the router itself, so a cold start still lands on the right screen.
+    weak var router: AppRouter?
+
     static let globalTopic = "all"
     static func languageTopic(for language: Language) -> String { "lang_\(language.rawValue)" }
 
@@ -79,20 +83,29 @@ extension PushService: MessagingDelegate {
     }
 }
 
+/// These handlers are deliberately **not** `nonisolated`: they inherit `@MainActor` from
+/// the class. UIKit invokes its completion once the async method returns, and does so on
+/// whatever context the continuation resumed on — off the main thread that aborts with
+/// "Call must be made on main thread".
 extension PushService: UNUserNotificationCenterDelegate {
     /// Show banners even while the app is open — race news is time-sensitive.
-    nonisolated func userNotificationCenter(
+    func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
         [.banner, .sound, .badge]
     }
 
-    nonisolated func userNotificationCenter(
+    /// Tapping a notification routes to the content it points at, via the `link` value in
+    /// the FCM data payload (`tota://post/22`). Notifications without a link just open
+    /// the app, which is the correct behaviour for a general announcement.
+    func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
-        // Deep linking is not wired yet; opening the app is the current behaviour.
+        let info = response.notification.request.content.userInfo
+        guard let raw = (info["link"] ?? info["deep_link"] ?? info["url"]) as? String else { return }
+        router?.handle(urlString: raw)
     }
 }
 

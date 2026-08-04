@@ -33,10 +33,12 @@ struct StandingsView: View {
     }
 
     @State private var model = StandingsViewModel()
+    @Environment(AppRouter.self) private var router
     @State private var scope: Scope = .overall
 
     var body: some View {
-        NavigationStack {
+        @Bindable var router = router
+        return NavigationStack(path: $router.standingsPath) {
             Group {
                 switch model.state {
                 case .idle, .loading:
@@ -51,6 +53,7 @@ struct StandingsView: View {
             .navigationTitle("Standings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Brand.surface, for: .navigationBar)
+            .navigationDestination(for: DeepLink.self) { DeepLinkDestination(link: $0) }
         }
         .task { await model.load() }
     }

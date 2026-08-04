@@ -21,10 +21,12 @@ final class StagesViewModel {
 
 struct StagesView: View {
     @State private var model = StagesViewModel()
+    @Environment(AppRouter.self) private var router
     let editionTitle: String?
 
     var body: some View {
-        NavigationStack {
+        @Bindable var router = router
+        return NavigationStack(path: $router.stagesPath) {
             ScrollView {
                 switch model.state {
                 case .idle, .loading:
@@ -44,6 +46,7 @@ struct StagesView: View {
             .navigationDestination(for: Stage.self) { stage in
                 StageDetailView(number: stage.number, fallbackTitle: stage.route)
             }
+            .navigationDestination(for: DeepLink.self) { DeepLinkDestination(link: $0) }
             .refreshable { await model.load(force: true) }
         }
         .task { await model.load() }

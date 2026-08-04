@@ -41,9 +41,11 @@ final class NewsViewModel {
 
 struct NewsView: View {
     @State private var model = NewsViewModel()
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
-        NavigationStack {
+        @Bindable var router = router
+        return NavigationStack(path: $router.newsPath) {
             ScrollView {
                 switch model.state {
                 case .idle, .loading:
@@ -58,6 +60,7 @@ struct NewsView: View {
             .navigationTitle("News")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Brand.surface, for: .navigationBar)
+            .navigationDestination(for: DeepLink.self) { DeepLinkDestination(link: $0) }
             .refreshable { await model.load(force: true) }
         }
         .task { await model.load() }
