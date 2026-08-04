@@ -2,21 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<false/>
-	</dict>
-	<key>TOTAAPIBaseURL</key>
-	<string>$(TOTA_API_BASE_URL)</string>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Gilvar.ttf</string>
-	</array>
-	<!-- Lets silent/data pushes wake the app so content can be refreshed ahead of the
-	     user opening it. Alert-only pushes work without this. -->
-	<!-- Registers tota:// so deep links work from Safari, Mail or a QR code, not just
-	     from a notification tap. -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -27,6 +12,12 @@
 				<string>tota</string>
 			</array>
 		</dict>
+	</array>
+	<key>TOTAAPIBaseURL</key>
+	<string>$(TOTA_API_BASE_URL)</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Gilvar.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
