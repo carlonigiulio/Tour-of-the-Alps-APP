@@ -30,13 +30,23 @@ final class HomeViewModel {
 
         // Independent endpoints, fetched concurrently so the home screen settles in one pass.
         async let bootstrapTask = try? await TotaAPI.bootstrap()
-        async let stagesTask = try? await TotaAPI.stages()
         async let standingsTask = try? await TotaAPI.standings()
         async let postsTask = try? await TotaAPI.posts(page: 1)
         async let videosTask = try? await TotaAPI.videos()
 
+        // Stages is the load-bearing call, so its error is the one worth showing. `try?`
+        // here would throw the real reason away and leave only a generic message — which
+        // is why this screen used to report "can't reach the server" while every other
+        // tab correctly reported the actual status code.
+        var failure: String?
+        var loadedStages: [Stage] = []
+        do {
+            loadedStages = try await TotaAPI.stages()
+        } catch {
+            failure = error.localizedDescription
+        }
+
         bootstrap = await bootstrapTask
-        let loadedStages = await stagesTask ?? []
         stages = loadedStages
         latest = Array((await postsTask)?.data.prefix(3) ?? [])
         videos = Array((await videosTask)?.prefix(6) ?? [])
@@ -47,9 +57,7 @@ final class HomeViewModel {
         }
 
         isLoading = false
-        if loadedStages.isEmpty {
-            errorMessage = String(localized: "Can't reach the server. Check your connection.")
-        }
+        errorMessage = failure
     }
 }
 
@@ -58,20 +66,23 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            Group {
                 if model.isLoading {
                     LoadingState()
                 } else if let error = model.errorMessage, model.stages.isEmpty {
                     ErrorState(message: error) { Task { await model.load(force: true) } }
                 } else {
-                    content
+                    // Only the loaded content runs under the status bar — the edge-to-edge
+                    // hero needs it. The placeholders keep the safe area so they sit where
+                    // they do on every other tab.
+                    ScrollView { content }
+                        .ignoresSafeArea(edges: .top)
+                        .refreshable { await model.load(force: true) }
                 }
             }
             .background(Brand.surfaceSubtle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .navigationBar)
-            .ignoresSafeArea(edges: .top)
-            .refreshable { await model.load(force: true) }
         }
         .task { await model.load() }
     }

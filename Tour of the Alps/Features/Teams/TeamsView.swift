@@ -35,14 +35,15 @@ struct TeamsView: View {
     var body: some View {
         @Bindable var router = router
         return NavigationStack(path: $router.teamsPath) {
-            ScrollView {
+            Group {
                 switch model.state {
                 case .idle, .loading:
                     LoadingState()
                 case .failed(let message):
                     ErrorState(message: message) { Task { await model.load(force: true) } }
                 case .loaded:
-                    sections
+                    ScrollView { sections }
+                        .refreshable { await model.load(force: true) }
                 }
             }
             .background(Brand.surfaceSubtle)
@@ -50,7 +51,6 @@ struct TeamsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Brand.surface, for: .navigationBar)
             .navigationDestination(for: DeepLink.self) { DeepLinkDestination(link: $0) }
-            .refreshable { await model.load(force: true) }
         }
         .task { await model.load() }
     }

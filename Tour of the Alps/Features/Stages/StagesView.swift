@@ -27,7 +27,9 @@ struct StagesView: View {
     var body: some View {
         @Bindable var router = router
         return NavigationStack(path: $router.stagesPath) {
-            ScrollView {
+            // The placeholder states sit outside the scroll view: inside one they cannot
+            // fill the screen, which is what made them render differently per tab.
+            Group {
                 switch model.state {
                 case .idle, .loading:
                     LoadingState()
@@ -36,7 +38,8 @@ struct StagesView: View {
                         Task { await model.load(force: true) }
                     }
                 case .loaded(let stages):
-                    list(stages)
+                    ScrollView { list(stages) }
+                        .refreshable { await model.load(force: true) }
                 }
             }
             .background(Brand.surfaceSubtle)
@@ -47,7 +50,6 @@ struct StagesView: View {
                 StageDetailView(number: stage.number, fallbackTitle: stage.route)
             }
             .navigationDestination(for: DeepLink.self) { DeepLinkDestination(link: $0) }
-            .refreshable { await model.load(force: true) }
         }
         .task { await model.load() }
     }

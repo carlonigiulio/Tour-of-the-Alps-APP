@@ -18,12 +18,18 @@ enum Loadable<Value> {
     }
 }
 
+/// Full-screen placeholders.
+///
+/// They fill the screen and paint their own background rather than sizing to their
+/// content: with a `minHeight` the same state rendered differently depending on its
+/// container — pinned to the top inside a `ScrollView`, vertically centred inside a
+/// `Group`, and leaving the window's bare background showing above and below.
 struct LoadingState: View {
     var body: some View {
-        VStack(spacing: 12) {
-            ProgressView().tint(Brand.green)
-        }
-        .frame(maxWidth: .infinity, minHeight: 220)
+        ProgressView()
+            .tint(Brand.green)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Brand.surfaceSubtle)
     }
 }
 
@@ -54,7 +60,8 @@ struct ErrorState: View {
             .buttonStyle(.plain)
         }
         .padding(Metrics.gutter)
-        .frame(maxWidth: .infinity, minHeight: 300)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Brand.surfaceSubtle)
     }
 }
 
