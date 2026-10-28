@@ -2,8 +2,6 @@
 
 The companion app for the **Tour of the Alps**, a UCI ProSeries stage race across Tyrol, South Tyrol and Trentino. Built as part of the race's organizing team; launching with the **2027 edition**.
 
-> Screenshots: _add 3–4 images in `docs/screenshots/` (Home, Stage detail, Standings, Team)._
-
 ## The problem
 
 During race week, fans, press and partners all need the same few things fast: today's stage, live results, who is riding, and race news, in three languages (English, Italian, German). Before this app that information was spread across the website, PDFs and social channels.
